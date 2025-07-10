@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chatbot Residencias y Titulación</title>
+</head>
+<body>
+<h1>Chatbot Residencias y Titulación Dual</h1>
+<div id="chatbox"></div>
+<input type="text" id="userInput" placeholder="Escribe tu pregunta aquí" />
+<button onclick="sendMessage()">Enviar</button>
+
+<script>
+async function sendMessage() {
+  const input = document.getElementById('userInput').value;
+  if (!input) return;
+  // Aquí enviarás la pregunta a tu backend n8n + Deepseek API
+  // Por ahora solo muestra la pregunta
+  const chatbox = document.getElementById('chatbox');
+  chatbox.innerHTML += `<p><strong>Tú:</strong> ${input}</p>`;
+  document.getElementById('userInput').value = '';
+
+  // TODO: hacer fetch a n8n para respuesta y mostrarla
+  chatbox.innerHTML += `<p><em>Respuesta del bot (simulada)</em></p>`;
+}
+</script>
+</body>
+</html>
