@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Portal Estudiantil ITESG — Justificantes, Titulación y Residencias</title>
+  <title>Portal Estudiantil ITESG — Justificantes · Titulación · Residencias</title>
   <style>
     :root { --bg:#0b1220; --card:#111a2a; --muted:#9fb1d0; --text:#eaf2ff; --accent:#59a6ff; --ok:#25c08a; --warn:#f0b429; --err:#ff6b6b; }
     html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
@@ -22,7 +22,6 @@
     .status{margin-top:10px;font-size:14px}
     .ok{color:var(--ok)} .warn{color:var(--warn)} .err{color:var(--err)}
     a{color:var(--accent)}
-    .answer{white-space:pre-wrap;background:#0c1627;border:1px solid #1f2b45;border-radius:10px;padding:12px}
     /* Tabs */
     .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 16px}
     .tab{padding:8px 12px;border-radius:999px;border:1px solid #1d2a41;background:#101a2b;color:var(--muted);cursor:pointer}
@@ -31,163 +30,107 @@
     .grid2{display:grid;gap:16px}
     @media(min-width:980px){.grid2{grid-template-columns:1fr 1fr}}
     .list{margin:6px 0 0 0;padding-left:18px}
+    /* Chat */
+    #chatBox{max-height:300px;overflow-y:auto;padding:12px;background:#0c1627;border:1px solid #1f2b45;border-radius:10px;margin-bottom:10px}
+    .msg{margin:6px 0;padding:8px 12px;border-radius:12px;max-width:75%;}
+    .user{background:#59a6ff;color:#08111f;margin-left:auto}
+    .bot{background:#1d2a41;color:#eaf2ff;margin-right:auto}
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Portal Estudiantil ITESG — Justificantes · Titulación · Residencias</h1>
-    <p class="lead">Consulta pasos oficiales y descarga formatos. Esta página llama a tus <strong>webhooks de n8n</strong> para generar documentos y responder dudas.</p>
+    <p class="lead">Consulta pasos oficiales, descarga formatos y chatea con el asistente. <em>Powered by Ingeniería Industrial ITESG</em>.</p>
 
     <!-- NAV TABS -->
     <div class="tabs">
       <button class="tab active" data-tab="tab-justificantes">Justificantes</button>
       <button class="tab" data-tab="tab-titulacion">Titulación</button>
       <button class="tab" data-tab="tab-residencias">Residencias</button>
-      <button class="tab" data-tab="tab-qa">Consultas (Q&A)</button>
+      <button class="tab" data-tab="tab-chat">Chat (IA)</button>
       <button class="tab" data-tab="tab-config">Config</button>
     </div>
 
     <!-- JUSTIFICANTES -->
     <section id="tab-justificantes" class="tabpage">
-      <div class="grid2">
-        <div class="card">
-          <h2 class="title">Información rápida</h2>
-          <p class="muted">Lineamientos típicos (ejemplo; ajusta el contenido desde n8n o edita el HTML):</p>
-          <ul class="list">
-            <li>Solicita dentro de las <strong>72 horas</strong> posteriores al evento.</li>
-            <li>Adjunta evidencia (constancia médica, citatorio, etc.).</li>
-            <li>Entrega al <strong>tutor</strong> y a <strong>Servicios Escolares</strong> según tu programa.</li>
-          </ul>
-          <p class="muted">*Nota: evita datos personales o sensibles. Esta página no publica <strong>horarios de profesores ni grupos</strong> para cuidar privacidad.</p>
-        </div>
-        <div class="card">
-          <h2 class="title">Generar formato de justificante</h2>
-          <form id="formJustificante">
-            <input type="hidden" id="tipoJ" value="justificante" />
-            <label for="nombreJ">Nombre completo</label>
-            <input id="nombreJ" required />
-            <div class="row">
-              <div>
-                <label for="matriculaJ">Matrícula</label>
-                <input id="matriculaJ" />
-              </div>
-              <div>
-                <label for="programaJ">Programa</label>
-                <input id="programaJ" placeholder="Ing. Industrial" />
-              </div>
-            </div>
-            <label for="motivoJ">Motivo</label>
-            <textarea id="motivoJ" rows="3" placeholder="Breve descripción"></textarea>
-            <div class="row">
-              <div>
-                <label for="fechaJ">Fecha del evento</label>
-                <input id="fechaJ" type="date" />
-              </div>
-              <div>
-                <label for="destinatarioJ">Dirigido a</label>
-                <input id="destinatarioJ" placeholder="Servicios Escolares / Tutor" />
-              </div>
-            </div>
-            <div style="margin-top:12px"><button class="btn" type="submit">Generar PDF</button></div>
-          </form>
-          <div id="outJustificante" class="status"></div>
-        </div>
+      <div class="card">
+        <h2 class="title">Generar justificante</h2>
+        <form id="formJustificante">
+          <input type="hidden" id="tipoJ" value="justificante" />
+          <label for="nombreJ">Nombre completo</label>
+          <input id="nombreJ" required />
+          <label for="matriculaJ">Matrícula</label>
+          <input id="matriculaJ" />
+          <label for="numControlJ">Número de control</label>
+          <input id="numControlJ" />
+          <label for="motivoJ">Motivo</label>
+          <textarea id="motivoJ"></textarea>
+          <label for="fechaJ">Fecha</label>
+          <input id="fechaJ" type="date" />
+          <label for="asignaturasJ">Asignaturas y docentes involucrados</label>
+          <textarea id="asignaturasJ"></textarea>
+          <p class="muted">Nota: Debe adjuntarse evidencia (ejemplo: justificante médico). Una vez lleno, enviarlo también al tutor y al coordinador de carrera.</p>
+          <div style="margin-top:12px"><button class="btn" type="submit">Generar PDF</button></div>
+        </form>
+        <div id="outJustificante" class="status"></div>
       </div>
     </section>
 
-    <!-- TITULACIÓN -->
+    <!-- TITULACION -->
     <section id="tab-titulacion" class="tabpage hidden">
-      <div class="grid2">
-        <div class="card">
-          <h2 class="title">Pasos del proceso (resumen)</h2>
-          <ol class="list">
-            <li>Revisar <strong>requisitos y modalidades</strong> (Tesis, Integral, EGEL, etc.).</li>
-            <li>Entregar <strong>solicitud</strong> y documentos en la coordinación.</li>
-            <li>Asignación de <strong>revisores/fechas</strong> según modalidad.</li>
-            <li>Registro de <strong>acta</strong> y seguimiento con Servicios Escolares.</li>
-          </ol>
-          <p class="muted">El detalle oficial puede responderse por Q&A (abajo) con tus documentos cargados a n8n.</p>
-        </div>
-        <div class="card">
-          <h2 class="title">Descargar formatos de titulación</h2>
-          <form id="formTitulacion">
-            <input type="hidden" id="tipoT" value="titulacion_solicitud" />
-            <label for="nombreT">Nombre completo</label>
-            <input id="nombreT" required />
-            <div class="row">
-              <div>
-                <label for="matriculaT">Matrícula</label>
-                <input id="matriculaT" />
-              </div>
-              <div>
-                <label for="programaT">Programa</label>
-                <input id="programaT" placeholder="Ing. Industrial" />
-              </div>
-            </div>
-            <label for="modalidadT">Modalidad</label>
-            <select id="modalidadT">
-              <option value="tesis">Tesis</option>
-              <option value="integral">Integral</option>
-              <option value="egel">EGEL</option>
-            </select>
-            <div style="margin-top:12px"><button class="btn" type="submit">Generar solicitud</button></div>
-          </form>
-          <div id="outTitulacion" class="status"></div>
-        </div>
+      <div class="card">
+        <h2 class="title">Generar solicitud de titulación</h2>
+        <form id="formTitulacion">
+          <input type="hidden" id="tipoT" value="titulacion_solicitud" />
+          <label for="nombreT">Nombre completo</label>
+          <input id="nombreT" required />
+          <label for="matriculaT">Matrícula</label>
+          <input id="matriculaT" />
+          <label for="modalidadT">Modalidad</label>
+          <select id="modalidadT">
+            <option value="tesis">Tesis</option>
+            <option value="integral">Integral</option>
+            <option value="egel">EGEL</option>
+            <option value="proyecto">Proyecto</option>
+            <option value="posgrado">Posgrado</option>
+          </select>
+          <p class="muted">Recuerda adjuntar digitalmente certificado, servicio social, inglés y constancia de puntos de desarrollo. Si no se integran aquí, enviarlos al correo <strong>ltorres@itesg.edu.mx</strong>.</p>
+          <div style="margin-top:12px"><button class="btn" type="submit">Generar solicitud</button></div>
+        </form>
+        <div id="outTitulacion" class="status"></div>
       </div>
     </section>
 
     <!-- RESIDENCIAS -->
     <section id="tab-residencias" class="tabpage hidden">
-      <div class="grid2">
-        <div class="card">
-          <h2 class="title">Información del proceso</h2>
-          <ul class="list">
-            <li>Créditos y <strong>prerrequisitos</strong> para inscribir residencias.</li>
-            <li><strong>Registro de proyecto</strong> y carta de presentación.</li>
-            <li><strong>Seguimiento</strong> (asesor interno/externo, reportes parciales).</li>
-            <li><strong>Informe final</strong> y evaluación.</li>
-          </ul>
-          <p class="muted">Los detalles (fechas exactas, formatos internos) se responden por Q&A usando tus documentos institucionales.</p>
-        </div>
-        <div class="card">
-          <h2 class="title">Generar formatos de residencias</h2>
-          <form id="formResidencias">
-            <input type="hidden" id="tipoR" value="residencias_solicitud" />
-            <label for="nombreR">Nombre completo</label>
-            <input id="nombreR" required />
-            <div class="row">
-              <div>
-                <label for="matriculaR">Matrícula</label>
-                <input id="matriculaR" />
-              </div>
-              <div>
-                <label for="programaR">Programa</label>
-                <input id="programaR" placeholder="Ing. Industrial" />
-              </div>
-            </div>
-            <label for="empresaR">Empresa / Dependencia</label>
-            <input id="empresaR" placeholder="Nombre de la organización" />
-            <label for="proyectoR">Proyecto</label>
-            <input id="proyectoR" placeholder="Título del proyecto" />
-            <div style="margin-top:12px"><button class="btn" type="submit">Generar solicitud</button></div>
-          </form>
-          <div id="outResidencias" class="status"></div>
-        </div>
+      <div class="card">
+        <h2 class="title">Generar solicitud de residencias</h2>
+        <form id="formResidencias">
+          <input type="hidden" id="tipoR" value="residencias_solicitud" />
+          <label for="nombreR">Nombre completo</label>
+          <input id="nombreR" required />
+          <label for="matriculaR">Matrícula</label>
+          <input id="matriculaR" />
+          <label for="empresaR">Empresa</label>
+          <input id="empresaR" />
+          <label for="proyectoR">Proyecto</label>
+          <input id="proyectoR" />
+          <p class="muted">Además de esta solicitud, adjuntar Carta de presentación, Anteproyecto, Carta de agradecimiento y Kardex. Si no se suben en línea, enviarlos al correo <strong>ltorres@itesg.edu.mx</strong>.</p>
+          <div style="margin-top:12px"><button class="btn" type="submit">Generar solicitud</button></div>
+        </form>
+        <div id="outResidencias" class="status"></div>
       </div>
     </section>
 
-    <!-- Q&A -->
-    <section id="tab-qa" class="tabpage hidden">
+    <!-- CHAT -->
+    <section id="tab-chat" class="tabpage hidden">
       <div class="card">
-        <h2 class="title">Consultas a documentos (Q&A)</h2>
-        <form id="formQA" style="display:flex;gap:8px">
-          <input id="q" placeholder="Ej.: ¿Cuáles son los requisitos para titulación por EGEL?" style="flex:1" />
-          <button class="btn" type="submit">Preguntar</button>
+        <h2 class="title">Chat con el asistente (IA)</h2>
+        <div id="chatBox"></div>
+        <form id="chatForm" style="display:flex;gap:8px">
+          <input id="chatInput" placeholder="Escribe tu pregunta..." style="flex:1" />
+          <button class="btn" type="submit">Enviar</button>
         </form>
-        <div id="qaState" class="status"></div>
-        <div id="qaAnswer" class="answer" style="display:none"></div>
-        <div id="qaSources" class="muted" style="display:none"></div>
       </div>
     </section>
 
@@ -197,22 +140,21 @@
         <h2 class="title">Configurar webhooks</h2>
         <label for="wF">Webhook Formatos (POST)</label>
         <input id="wF" placeholder="https://tu-dominio/webhook/formatos" />
-        <label for="wQ">Webhook Q&A (POST)</label>
+        <label for="wQ">Webhook Chat/Q&A (POST)</label>
         <input id="wQ" placeholder="https://tu-dominio/webhook/qa" />
         <div style="display:flex;gap:8px;margin-top:12px">
           <button id="saveCfg" class="btn">Guardar</button>
           <button id="resetCfg" class="btn secondary">Reset</button>
         </div>
         <div id="cfgStatus" class="status muted" style="margin-top:8px"></div>
-        <p class="muted" style="margin-top:10px">Las URLs se guardan en <code>localStorage</code>. Si tu n8n corre local, usa túnel HTTPS.</p>
       </div>
     </section>
 
-    <p class="muted">Privacidad: esta página no publica <strong>horarios de docentes</strong>, ni listados de grupos. Solo procesos y formatos.</p>
+    <p class="muted">Privacidad: esta página no publica horarios de docentes ni listados de grupos. Solo procesos y formatos.</p>
   </div>
 
   <script>
-    // ===== Tabs =====
+    // Tabs
     const tabs = document.querySelectorAll('.tab');
     const pages = document.querySelectorAll('.tabpage');
     tabs.forEach(t=>t.addEventListener('click',()=>{
@@ -222,142 +164,35 @@
       document.getElementById(t.dataset.tab).classList.remove('hidden');
     }));
 
-    // ===== Config (localStorage) =====
-    const $wF = document.getElementById('wF');
-    const $wQ = document.getElementById('wQ');
-    const $cfgStatus = document.getElementById('cfgStatus');
-    const WKEY_F = 'webhook_formatos';
-    const WKEY_Q = 'webhook_qa';
+    // Config
+    const $wF=document.getElementById('wF');
+    const $wQ=document.getElementById('wQ');
+    const $cfgStatus=document.getElementById('cfgStatus');
+    const WKEY_F='webhook_formatos';
+    const WKEY_Q='webhook_qa';
+    function loadCfg(){ $wF.value=localStorage.getItem(WKEY_F)||''; $wQ.value=localStorage.getItem(WKEY_Q)||''; $cfgStatus.textContent=`Usando → Formatos: ${$wF.value||'(sin)'} | Chat: ${$wQ.value||'(sin)'}`; }
+    function saveCfg(){ localStorage.setItem(WKEY_F,$wF.value.trim()); localStorage.setItem(WKEY_Q,$wQ.value.trim()); loadCfg(); }
+    function resetCfg(){ localStorage.removeItem(WKEY_F); localStorage.removeItem(WKEY_Q); loadCfg(); }
+    document.getElementById('saveCfg').addEventListener('click',e=>{e.preventDefault();saveCfg();});
+    document.getElementById('resetCfg').addEventListener('click',e=>{e.preventDefault();resetCfg();});
+    loadCfg();
 
-    function loadCfg(){
-      if(!$wF||!$wQ||!$cfgStatus) return;
-      $wF.value = localStorage.getItem(WKEY_F) || '';
-      $wQ.value = localStorage.getItem(WKEY_Q) || '';
-      const f = $wF.value || '(sin URL)';
-      const q = $wQ.value || '(sin URL)';
-      $cfgStatus.textContent = `Usando → Formatos: ${f} | Q&A: ${q}`;
-    }
-    function saveCfg(){
-      localStorage.setItem(WKEY_F, ($wF?.value||'').trim());
-      localStorage.setItem(WKEY_Q, ($wQ?.value||'').trim());
-      loadCfg();
-    }
-    function resetCfg(){
-      localStorage.removeItem(WKEY_F);
-      localStorage.removeItem(WKEY_Q);
-      loadCfg();
-    }
-    window.addEventListener('DOMContentLoaded', loadCfg);
-    document.getElementById('saveCfg')?.addEventListener('click', (e)=>{e.preventDefault(); saveCfg();});
-    document.getElementById('resetCfg')?.addEventListener('click', (e)=>{e.preventDefault(); resetCfg();});
+    // Helpers
+    const j=id=>document.getElementById(id);
+    async function postJSON(url,body){const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!res.ok) throw new Error('HTTP '+res.status);return res.json();}
 
-    // ===== Helpers =====
-    const j = (id)=>document.getElementById(id);
-    const fmtErr = (err)=> (err && (err.message || err.status || err)) + '';
+    // Justificantes
+    j('formJustificante').addEventListener('submit',async e=>{e.preventDefault();const url=localStorage.getItem(WKEY_F);const out=j('outJustificante');if(!url){out.textContent='Configura webhook formatos';return;}const payload={tipo:j('tipoJ').value,nombre:j('nombreJ').value,matricula:j('matriculaJ').value,numControl:j('numControlJ').value,motivo:j('motivoJ').value,fecha:j('fechaJ').value,asignaturas:j('asignaturasJ').value};out.textContent='Generando…';try{const d=await postJSON(url,payload);out.innerHTML=d?.ok?`✅ <a href="${d.fileUrl}" target="_blank">Descargar</a>`:'Error en servidor';}catch(err){out.textContent=err;}});
 
-    async function postJSON(url, body){
-      const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      return res.json();
-    }
+    // Titulación
+    j('formTitulacion').addEventListener('submit',async e=>{e.preventDefault();const url=localStorage.getItem(WKEY_F);const out=j('outTitulacion');if(!url){out.textContent='Configura webhook formatos';return;}const payload={tipo:j('tipoT').value,nombre:j('nombreT').value,matricula:j('matriculaT').value,modalidad:j('modalidadT').value};out.textContent='Generando…';try{const d=await postJSON(url,payload);out.innerHTML=d?.ok?`✅ <a href="${d.fileUrl}" target="_blank">Descargar</a>`:'Error';}catch(err){out.textContent=err;}});
 
-    function getWebhookF(){ return localStorage.getItem(WKEY_F); }
-    function getWebhookQ(){ return localStorage.getItem(WKEY_Q); }
+    // Residencias
+    j('formResidencias').addEventListener('submit',async e=>{e.preventDefault();const url=localStorage.getItem(WKEY_F);const out=j('outResidencias');if(!url){out.textContent='Configura webhook formatos';return;}const payload={tipo:j('tipoR').value,nombre:j('nombreR').value,matricula:j('matriculaR').value,empresa:j('empresaR').value,proyecto:j('proyectoR').value};out.textContent='Generando…';try{const d=await postJSON(url,payload);out.innerHTML=d?.ok?`✅ <a href="${d.fileUrl}" target="_blank">Descargar</a>`:'Error';}catch(err){out.textContent=err;}});
 
-    // ===== Justificantes (Formato) =====
-    j('formJustificante').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const url = getWebhookF();
-      const out = j('outJustificante');
-      if(!url){ out.innerHTML = '<span class="warn">Configura el Webhook de Formatos.</span>'; return; }
-      const payload = {
-        tipo: j('tipoJ').value,
-        nombre: j('nombreJ').value,
-        matricula: j('matriculaJ').value,
-        programa: j('programaJ').value,
-        motivo: j('motivoJ').value,
-        fecha: j('fechaJ').value,
-        destinatario: j('destinatarioJ').value,
-      };
-      out.textContent = 'Generando…';
-      try{
-        const data = await postJSON(url, payload);
-        if(data?.ok && data.fileUrl){
-          out.innerHTML = `✅ <span class="ok">Formato listo.</span> <a href="${data.fileUrl}" target="_blank" rel="noopener">Descargar</a>`;
-        } else { out.innerHTML = '<span class="warn">No se recibió fileUrl.</span>'; }
-      }catch(err){ out.innerHTML = '<span class="err">Error: '+fmtErr(err)+'</span> (¿CORS/túnel HTTPS?)'; }
-    });
-
-    // ===== Titulación (Solicitud) =====
-    j('formTitulacion').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const url = getWebhookF();
-      const out = j('outTitulacion');
-      if(!url){ out.innerHTML = '<span class="warn">Configura el Webhook de Formatos.</span>'; return; }
-      const payload = {
-        tipo: j('tipoT').value, // p.ej. "titulacion_solicitud"
-        nombre: j('nombreT').value,
-        matricula: j('matriculaT').value,
-        programa: j('programaT').value,
-        modalidad: j('modalidadT').value,
-      };
-      out.textContent = 'Generando…';
-      try{
-        const data = await postJSON(url, payload);
-        if(data?.ok && data.fileUrl){
-          out.innerHTML = `✅ <span class="ok">Solicitud lista.</span> <a href="${data.fileUrl}" target="_blank" rel="noopener">Descargar</a>`;
-        } else { out.innerHTML = '<span class="warn">No se recibió fileUrl.</span>'; }
-      }catch(err){ out.innerHTML = '<span class="err">Error: '+fmtErr(err)+'</span>'; }
-    });
-
-    // ===== Residencias (Solicitud) =====
-    j('formResidencias').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const url = getWebhookF();
-      const out = j('outResidencias');
-      if(!url){ out.innerHTML = '<span class="warn">Configura el Webhook de Formatos.</span>'; return; }
-      const payload = {
-        tipo: j('tipoR').value, // p.ej. "residencias_solicitud"
-        nombre: j('nombreR').value,
-        matricula: j('matriculaR').value,
-        programa: j('programaR').value,
-        empresa: j('empresaR').value,
-        proyecto: j('proyectoR').value,
-      };
-      out.textContent = 'Generando…';
-      try{
-        const data = await postJSON(url, payload);
-        if(data?.ok && data.fileUrl){
-          out.innerHTML = `✅ <span class="ok">Solicitud lista.</span> <a href="${data.fileUrl}" target="_blank" rel="noopener">Descargar</a>`;
-        } else { out.innerHTML = '<span class="warn">No se recibió fileUrl.</span>'; }
-      }catch(err){ out.innerHTML = '<span class="err">Error: '+fmtErr(err)+'</span>'; }
-    });
-
-    // ===== Q&A =====
-    j('formQA').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const url = getWebhookQ();
-      const state = j('qaState');
-      const ans = j('qaAnswer');
-      const src = j('qaSources');
-      if(!url){ state.innerHTML = '<span class="warn">Configura el Webhook de Q&A.</span>'; return; }
-      const q = j('q').value.trim();
-      if(!q){ state.innerHTML = '<span class="warn">Escribe una pregunta.</span>'; return; }
-      state.textContent = 'Consultando…';
-      ans.style.display = 'none'; src.style.display = 'none';
-      try{
-        const data = await postJSON(url, { q });
-        if(data?.ok){
-          ans.textContent = data.answer || '(sin respuesta)';
-          ans.style.display = 'block';
-          if(Array.isArray(data.sources) && data.sources.length){
-            src.innerHTML = 'Fuentes: ' + data.sources.map(s=>`<a href="${s.url}" target="_blank" rel="noopener">${s.title||s.url}</a>`).join(' · ');
-            src.style.display = 'block';
-          } else { src.style.display = 'none'; }
-          state.innerHTML = '<span class="ok">Listo.</span>';
-        } else { state.innerHTML = '<span class="warn">Respuesta no válida del servidor.</span>'; }
-      } catch(err){ state.innerHTML = '<span class="err">Error: '+fmtErr(err)+'</span> (¿CORS/túnel HTTPS?)'; }
-    });
+    // Chat
+    const chatBox=j('chatBox');
+    j('chatForm').addEventListener('submit',async e=>{e.preventDefault();const url=localStorage.getItem(WKEY_Q);if(!url){alert('Configura webhook Q&A primero');return;}const txt=j('chatInput').value.trim();if(!txt) return;const userMsg=document.createElement('div');userMsg.className='msg user';userMsg.textContent=txt;chatBox.appendChild(userMsg);j('chatInput').value='';chatBox.scrollTop=chatBox.scrollHeight;try{const d=await postJSON(url,{q:txt});const botMsg=document.createElement('div');botMsg.className='msg bot';botMsg.textContent=d?.answer||'(sin respuesta)';chatBox.appendChild(botMsg);chatBox.scrollTop=chatBox.scrollHeight;}catch(err){const botMsg=document.createElement('div');botMsg.className='msg bot';botMsg.textContent='Error: '+err;chatBox.appendChild(botMsg);}});
   </script>
 </body>
 </html>
