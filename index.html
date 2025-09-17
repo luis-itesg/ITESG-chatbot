@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portal Estudiantil ITESG — Justificantes · Titulación · Residencias</title>
+  <link rel="icon" href="logo.webp" type="image/webp">
+  <style>
+    :root { --bg:#0b1220; --card:#111a2a; --muted:#9fb1d0; --text:#eaf2ff; --accent:#59a6ff; --ok:#25c08a; --warn:#f0b429; --err:#ff6b6b; }
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    .wrap{max-width:1100px;margin:auto;padding:24px}
+    h1{font-size:22px;margin:0 0 8px 0}
+    p.lead{color:var(--muted);margin:0 0 24px 0}
+    .card{background:var(--card);border:1px solid #1d2a41;border-radius:16px;padding:16px;margin-bottom:16px}
+    .title{font-weight:700;margin:0 0 10px 0}
+    label{display:block;font-size:13px;color:var(--muted);margin:6px 0 6px}
+    input,select,textarea{width:100%;padding:10px 12px;background:#0c1627;border:1px solid #1f2b45;color:var(--text);border-radius:10px;outline:none}
+    textarea{resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn{appearance:none;border:none;background:var(--accent);color:#08111f;font-weight:700;padding:10px 14px;border-radius:12px;cursor:pointer}
+    .btn.secondary{background:#1d2a41;color:#fff;border:1px solid #2a3a5d}
+    .muted{color:var(--muted);font-size:12px}
+    .status{margin-top:10px;font-size:14px}
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .err{color:var(--err)}
+    a{color:var(--accent)}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 16px}
+    .tab{padding:8px 12px;border-radius:999px;border:1px solid #1d2a41;background:#101a2b;color:var(--muted);cursor:pointer}
+    .tab.active{background:var(--accent);color:#08111f;border-color:transparent}
+    .hidden{display:none}
+    .grid2{display:grid;gap:16px}
+    @media(min-width:980px){.grid2{grid-template-columns:1fr 1fr}}
+    #chatBox{max-height:300px;overflow-y:auto;padding:12px;background:#0c1627;border:1px solid #1f2b45;border-radius:10px;margin-bottom:10px}
+    .msg{margin:6px 0;padding:8px 12px;border-radius:12px;max-width:75%}
+    .user{background:#59a6ff;color:#08111f;margin-left:auto}
+    .bot{background:#1d2a41;color:#eaf2ff;margin-right:auto}
+
+    /* ===== Header: logo + títulos en la misma fila ===== */
+    .header{display:flex;align-items:center;gap:24px;margin-bottom:12px}
+    .logo{max-width:140px;display:block;margin:0}      /* ya no centrado */
+    .brand h1{margin:0 0 6px 0;font-size:28px}
+    .brand .lead{margin:0 0 16px 0}
+    @media (max-width:720px){
+      .header{flex-direction:column;align-items:flex-start;gap:12px}
+      .logo{max-width:120px}
+      .brand h1{font-size:22px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- HEADER: logo + títulos -->
+    <div class="header">
+      <picture>
+        <source srcset="logo.webp" type="image/webp">
+        <img src="logo.png" alt="Logo Chatbot Ingeniería Industrial" class="logo" />
+      </picture>
+      <div class="brand">
+        <h1>Portal Estudiantil ITESG — Justificantes · Titulación · Residencias</h1>
+        <p class="lead"><em>Powered by Ingeniería Industrial ITESG</em></p>
+      </div>
+    </div>
+
+    <!-- NAV TABS (orden solicitado) -->
+    <div class="tabs">
+      <button class="tab active" data-tab="tab-chat">Chat (IA)</button>
+      <button class="tab" data-tab="tab-justificantes">Justificantes</button>
+      <button class="tab" data-tab="tab-residencias">Residencias</button>
+      <button class="tab" data-tab="tab-titulacion">Solicitud de Titulación</button>
+      <button class="tab" data-tab="tab-seguimiento">Seguimiento</button>
+      <button class="tab" data-tab="tab-anexo1">Registro Proyecto (Anexo I)</button>
+      <button class="tab" data-tab="tab-asesorias">Asesorías de Titulación</button>
+      <button class="tab tab-config" data-tab="tab-config">Config</button>
+    </div>
+
+    <!-- CHAT -->
+    <section id="tab-chat" class="tabpage">
+      <div class="card">
+        <h2 class="title">Chat con el asistente (IA)</h2>
+        <div id="chatBox"></div>
+        <form id="chatForm" style="display:flex;gap:8px">
+          <input id="chatInput" placeholder="Escribe tu pregunta..." style="flex:1" />
+          <button class="btn" type="submit">Enviar</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- JUSTIFICANTES -->
+    <section id="tab-justificantes" class="tabpage hidden">
+      <div class="card">
+        <h2 class="title">Generar justificante</h2>
+        <form id="formJustificante">
+          <input type="hidden" id="tipoJ" value="justificante" />
+          <label for="nombreJ">Nombre completo</label>
+          <input id="nombreJ" required />
+          <label for="numControlJ">Número de control</label>
+          <input id="numControlJ" required />
+          <label for="motivoJ">Motivo</label>
+          <textarea id="motivoJ"></textarea>
+          <label for="fechaJ">Fecha</label>
+          <input id="fechaJ" type="date" />
+          <label for="asignaturasJ">Asignaturas y docentes involucrados</label>
+          <textarea id="asignaturasJ"></textarea>
+          <p class="muted">Solicita dentro de 72 h posteriores al evento. Adjunta evidencia al entregarlo con tu tutor/coordinación.</p>
+          <div style="margin-top:12px"><button class="btn" type="submit">Generar PDF</button></div>
+        </form>
+        <div id="outJustificante" class="status"></div>
+      </div>
+    </section>
+
+    <!-- RESIDENCIAS -->
+    <section id="tab-residencias" class="tabpage hidden">
+      <div class="card">
+        <h2 class="title">Generar solicitud de residencias</h2>
+        <form id="formResidencias">
+          <input type="hidden" id="tipoR" value="residencias_solicitud" />
+
+          <h3 class="title">Proyecto</h3>
+          <label for="proyectoR">Nombre del proyecto</label>
+          <input id="proyectoR" />
+          <label for="tipoProyectoR">Tipo de proyecto</label>
+          <select id="tipoProyectoR">
+            <option value="residencias">Residencias profesionales</option>
+            <option value="dual">Dual</option>
+            <option value="integrador">Integrador</option>
+            <option value="innovacion_investigacion">Innovación/Investigación</option>
+          </select>
+          <label for="opcionProyectoR">Opción</label>
+          <select id="opcionProyectoR">
+            <option value="banco">Banco de proyectos</option>
+            <option value="propia">Propuesta propia</option>
+            <option value="trabajador">Trabajador</option>
+            <option value="necesidad_org">Necesidad de la organización</option>
+            <option value="verano_inv">Verano de investigación</option>
+            <option value="innovatecnm">INNOVATecNM</option>
+          </select>
+          <label for="areaOrgR">Área organizacional</label>
+          <select id="areaOrgR">
+            <option value="produccion">Producción</option>
+            <option value="mantenimiento">Mantenimiento</option>
+            <option value="calidad">Calidad</option>
+            <option value="tic">TIC</option>
+            <option value="otra">Otra</option>
+          </select>
+          <label for="periodoR">Periodo de aplicación</label>
+          <select id="periodoR">
+            <option value="ene_jun">Enero–Junio</option>
+            <option value="ago_dic">Agosto–Diciembre</option>
+            <option value="anual">Año</option>
+          </select>
+
+          <h3 class="title">Organización</h3>
+          <label for="orgNombreR">Nombre</label>
+          <input id="orgNombreR" />
+          <label for="orgSectorR">Ramo / sector</label>
+          <select id="orgSectorR">
+            <option value="industrial">Industrial</option>
+            <option value="servicios">Servicios</option>
+            <option value="publico">Público</option>
+            <option value="privado">Privado</option>
+            <option value="otro">Otro</option>
+          </select>
+          <label for="orgDomR">Domicilio</label>
+          <input id="orgDomR" />
+          <label for="orgCiudadR">Ciudad</label>
+          <input id="orgCiudadR" />
+          <label for="orgTelR">Teléfono</label>
+          <input id="orgTelR" />
+          <label for="asesorExtNombreR">Asesor externo — Nombre</label>
+          <input id="asesorExtNombreR" />
+          <label for="asesorExtPuestoR">Asesor externo — Puesto</label>
+          <input id="asesorExtPuestoR" />
+          <label for="asesorExtTelR">Asesor externo — Teléfono</label>
+          <input id="asesorExtTelR" />
+          <label for="asesorExtCorreoR">Asesor externo — Correo</label>
+          <input id="asesorExtCorreoR" />
+          <label for="firmaNombreR">Quien firmará el acuerdo — Nombre</label>
+          <input id="firmaNombreR" />
+          <label for="firmaPuestoR">Quien firmará el acuerdo — Puesto</label>
+          <input id="firmaPuestoR" />
+
+          <h3 class="title">Residente</h3>
+          <label for="resNombreR">Nombre del estudiante</label>
+          <input id="resNombreR" />
+          <label for="resCarreraR">Carrera</label>
+          <input id="resCarreraR" />
+          <label for="resControlR">Número de control</label>
+          <input id="resControlR" />
+          <label for="resCorreoR">Correo</label>
+          <input id="resCorreoR" />
+          <label for="resCelR">Teléfono celular</label>
+          <input id="resCelR" />
+          <label for="resSeguroR">Seguro</label>
+          <select id="resSeguroR">
+            <option value="imss">IMSS</option>
+            <option value="issste">ISSSTE</option>
+            <option value="otro">Otro</option>
+          </select>
+          <label for="resNssR">NSS (Número de Seguro Social)</label>
+          <input id="resNssR" />
+
+          <p class="muted">El PDF se genera solo hasta <strong>Datos del Residente</strong>. La sección “Validación de requisitos” la llena la Coordinación.</p>
+          <div style="margin-top:12px"><button class="btn" type="submit">Generar solicitud</button></div>
+        </form>
+        <div id="outResidencias" class="status"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="title">Formatos de residencias (descarga)</h2>
+        <p class="muted">Estos formatos <strong>no se rellenan aquí</strong>; se llenan a mano por estudiante y asesores.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn secondary" id="btnXXIX">Descargar ANEXO XXIX — Evaluación y Seguimiento</button>
+          <button class="btn secondary" id="btnXXX">Descargar ANEXO XXX — Evaluación de Reporte</button>
+          <button class="btn secondary" id="btnEstructura">Descargar ANEXO XXVIII — Estructura Reporte Final</button>
+        </div>
+        <div id="outResFormatos" class="status"></div>
+      </div>
+    </section>
+
+    <!-- SOLICITUD DE TITULACIÓN -->
+    <section id="tab-titulacion" class="tabpage hidden">
+      <div class="card">
+        <h2 class="title">Generar solicitud de titulación</h2>
+        <form id="formTitulacion">
+          <input type="hidden" id="tipoT" value="titulacion_solicitud" />
+
+          <label for="planT">Plan de estudios</label>
+          <select id="planT">
+            <option value="plan2004">Plan 2004</option>
+            <option value="plan2010">Plan 2010</option>
+          </select>
+
+          <label for="opcionT">Opción de titulación</label>
+          <select id="opcionT"></select>
+          <div id="opcionHintT" class="muted" style="margin-top:6px"></div>
+
+          <h3 class="title" style="margin-top:12px">Datos del(a) candidato(a)</h3>
+          <div class="row">
+            <div>
+              <label for="apPatT">Apellido paterno</label>
+              <input id="apPatT" required />
+            </div>
+            <div>
+              <label for="apMatT">Apellido materno</label>
+              <input id="apMatT" />
+            </div>
+          </div>
+          <label for="nombresT">Nombres</label>
+          <input id="nombresT" required />
+
+          <div class="row">
+            <div>
+              <label for="carreraT">Carrera</label>
+              <input id="carreraT" placeholder="Ing. Industrial" />
+            </div>
+            <div>
+              <label for="tramiteT">Trámite</label>
+              <select id="tramiteT">
+                <option value="primera_vez">Primera vez</option>
+                <option value="reinicio">Reinicio</option>
+              </select>
+            </div>
+          </div>
+
+          <label for="numControlT">Número de control</label>
+          <input id="numControlT" />
+
+          <h3 class="title" style="margin-top:12px">Datos de contacto</h3>
+          <label for="domT">Domicilio</label>
+          <input id="domT" />
+          <div class="row">
+            <div>
+              <label for="correoTT">Correo electrónico</label>
+              <input id="correoTT" type="email" />
+            </div>
+            <div>
+              <label for="telCasaT">Teléfono de casa</label>
+              <input id="telCasaT" />
+            </div>
+          </div>
+          <label for="telCelT">Teléfono celular</label>
+          <input id="telCelT" />
+
+          <div id="proyectoBoxT" class="hidden" style="margin-top:12px">
+            <label for="proyectoT">Nombre del proyecto (si aplica)</label>
+            <input id="proyectoT" placeholder="No aplica para EGEL" />
+          </div>
+
+          <p class="muted">El PDF se llenará <strong>únicamente hasta la sección “SOLICITÓ CANDIDATO (A)”</strong>. Las validaciones y firmas posteriores corresponden a las áreas institucionales.</p>
+          <div style="margin-top:12px"><button class="btn" type="submit">Generar solicitud</button></div>
+        </form>
+        <div id="outTitulacion" class="status"></div>
+      </div>
+    </section>
+
+    <!-- SEGUIMIENTO -->
+    <section id="tab-seguimiento" class="tabpage hidden">
+      <div class="card">
+        <h2 class="title">Seguimiento de titulación</h2>
+        <form id="formEstadoTit">
+          <div class="row">
+            <div>
+              <label for="estadoNumCtrl">Número de control</label>
+              <input id="estadoNumCtrl" required />
+            </div>
+            <div>
+              <label for="estadoTipo">Verificar con</label>
+              <select id="estadoTipo">
+                <option value="apellido">Apellido paterno</option>
+                <option value="nss3">NSS (últimos 3)</option>
+              </select>
+            </div>
+          </div>
+          <label for="estadoValor">Valor del verificador</label>
+          <input id="estadoValor" placeholder="ej. lopez / 527" />
+          <div style="margin-top:12px"><button class="btn" type="submit">Consultar</button></div>
+        </form>
+        <div id="outEstadoTit" class="status"></div>
+      </div>
+    </section>
+
+    <!-- REGISTRO DE PROYECTO (ANEXO I) -->
+    <section id="tab-anexo1" class="tabpage hidden">
+      <div class="card">
+        <h2 class="title">Registro de Proyecto — Anexo I</h2>
+        <form id="formAnexo1">
+          <input type="hidden" id="tipoA1" value="titulacion_registro_proyecto" />
+
+          <h3 class="title">Datos generales</h3>
+          <label for="a1Proyecto">Nombre del Proyecto</label>
+          <input id="a1Proyecto" />
+          <label for="a1Asesor">Nombre del Asesor(a)</label>
+          <input id="a1Asesor" />
+          <label for="a1NumEst">No. de Estudiantes</label>
+          <input id="a1NumEst" type="number" min="1" />
+
+          <h3 class="title">Participantes (egresados)</h3>
+          <p class="muted">Captura un estudiante por línea: <em>Nombre completo | No. de control | Carrera</em></p>
+          <textarea id="a1Participantes" rows="5" placeholder="Nombre Apellido | A00-0000 | Ing. Industrial&#10;..."></textarea>
+
+          <label for="a1Obs">Observaciones</label>
+          <textarea id="a1Obs" rows="3"></textarea>
+
+          <p class="muted">Las firmas de conformidad y Vo. Bo. se realizan en físico en la hoja oficial.</p>
+          <div style="margin-top:12px"><button class="btn" type="submit">Generar Anexo I (PDF)</button></div>
+        </form>
+        <div id="outAnexo1" class="status"></div>
+      </div>
+    </section>
+
+    <!-- REPORTE DE SEGUIMIENTO DE ASESORÍAS -->
+    <section id="tab-asesorias" class="tabpage hidden">
+      <div class="card">
+        <h2 class="title">Reporte de Seguimiento de Asesorías</h2>
+        <form id="formAsesorias">
+          <input type="hidden" id="tipoAs" value="titulacion_asesorias_reporte" />
+
+          <div class="row">
+            <div>
+              <label for="asProyecto">Proyecto</label>
+              <input id="asProyecto" />
+            </div>
+            <div>
+              <label for="asAsesor">Asesor interno</label>
+              <input id="asAsesor" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="asAlumno">Alumno(a)</label>
+              <input id="asAlumno" />
+            </div>
+            <div>
+              <label for="asControl">Número de control</label>
+              <input id="asControl" />
+            </div>
+          </div>
+
+          <h3 class="title">Sesión</h3>
+          <div class="row">
+            <div>
+              <label for="asNum">No. de sesión</label>
+              <input id="asNum" type="number" min="1" />
+            </div>
+            <div>
+              <label for="asFecha">Fecha</label>
+              <input id="asFecha" type="date" />
+            </div>
+          </div>
+          <label for="asAcuerdos">Acuerdos / Avances</label>
+          <textarea id="asAcuerdos" rows="4"></textarea>
+          <label for="asObserv">Observaciones</label>
+          <textarea id="asObserv" rows="3"></textarea>
+
+          <p class="muted">El documento oficial contempla firmas del asesor y del estudiante por sesión. Estas se recaban al imprimir el reporte.</p>
+          <div style="margin-top:12px"><button class="btn" type="submit">Generar reporte (PDF)</button></div>
+        </form>
+        <div id="outAsesorias" class="status"></div>
+      </div>
+    </section>
+
+    <!-- CONFIG (solo visible con #admin) -->
+    <section id="tab-config" class="tabpage hidden">
+      <div class="card">
+        <h2 class="title">Configurar webhooks</h2>
+        <label for="wF">Webhook Formatos (POST)</label>
+        <input id="wF" placeholder="https://tu-dominio/webhook/formatos" />
+        <label for="wQ">Webhook Chat/Q&A (POST)</label>
+        <input id="wQ" placeholder="https://tu-dominio/webhook/qa" />
+        <label for="wS">Webhook Estado Titulación (POST)</label>
+        <input id="wS" placeholder="https://tu-dominio/webhook/titulacion/estado" />
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button id="saveCfg" class="btn">Guardar</button>
+          <button id="resetCfg" class="btn secondary">Reset</button>
+        </div>
+        <div id="cfgStatus" class="status muted" style="margin-top:8px"></div>
+      </div>
+    </section>
+
+    <p class="muted">Privacidad: esta página no publica horarios de docentes ni listados de grupos. Solo procesos y formatos.</p>
+  </div>
+
+  <script>
+    /* ---------- TABS ---------- */
+    const tabs = document.querySelectorAll('.tab');
+    const pages = document.querySelectorAll('.tabpage');
+    tabs.forEach(t=>t.addEventListener('click',()=>{
+      tabs.forEach(x=>x.classList.remove('active'));
+      pages.forEach(p=>p.classList.add('hidden'));
+      t.classList.add('active');
+      document.getElementById(t.dataset.tab).classList.remove('hidden');
+    }));
+
+    /* ---------- CONFIG (localStorage) ---------- */
+    const $wF=document.getElementById('wF');
+    const $wQ=document.getElementById('wQ');
+    const $wS=document.getElementById('wS');
+    const $cfgStatus=document.getElementById('cfgStatus');
+    const WKEY_F='webhook_formatos';
+    const WKEY_Q='webhook_qa';
+    const WKEY_S='webhook_estado';
+    function loadCfg(){
+      if($wF) $wF.value=localStorage.getItem(WKEY_F)||'';
+      if($wQ) $wQ.value=localStorage.getItem(WKEY_Q)||'';
+      if($wS) $wS.value=localStorage.getItem(WKEY_S)||'';
+      if($cfgStatus){
+        $cfgStatus.textContent = `Usando → Formatos: ${$wF?.value||'(sin)'} | Chat: ${$wQ?.value||'(sin)'} | Estado: ${$wS?.value||'(sin)'}`;
+      }
+    }
+    function saveCfg(){ if($wF) localStorage.setItem(WKEY_F,$wF.value.trim()); if($wQ) localStorage.setItem(WKEY_Q,$wQ.value.trim()); if($wS) localStorage.setItem(WKEY_S,$wS.value.trim()); loadCfg(); }
+    function resetCfg(){ localStorage.removeItem(WKEY_F); localStorage.removeItem(WKEY_Q); localStorage.removeItem(WKEY_S); loadCfg(); }
+    document.getElementById('saveCfg')?.addEventListener('click',e=>{e.preventDefault();saveCfg();});
+    document.getElementById('resetCfg')?.addEventListener('click',e=>{e.preventDefault();resetCfg();});
+    loadCfg();
+
+    // Ocultar pestaña Config salvo #admin
+    (function(){
+      const isAdmin = location.hash === '#admin';
+      const tabBtn = document.querySelector('.tab-config');
+      const tabPage = document.getElementById('tab-config');
+      if(!isAdmin){ tabBtn?.parentNode?.removeChild(tabBtn); tabPage?.parentNode?.removeChild(tabPage); }
+    })();
+
+    /* ---------- HELPERS ---------- */
+    const j = id => document.getElementById(id);
+    async function postJSON(url, body){
+      const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
+    }
+
+    /* ---------- JUSTIFICANTES ---------- */
+    j('formJustificante').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const url=localStorage.getItem(WKEY_F);
+      const out=j('outJustificante');
+      if(!url){ out.textContent='Configura webhook formatos'; return; }
+      const payload={
+        tipo:j('tipoJ').value,
+        nombre:j('nombreJ').value,
+        numero_control:j('numControlJ').value,
+        motivo:j('motivoJ').value,
+        fecha:j('fechaJ').value,
+        asignaturas:j('asignaturasJ').value
+      };
+      out.textContent='Generando…';
+      try{ const d=await postJSON(url,payload); out.innerHTML=d?.ok?`✅ <a href="${d.fileUrl}" target="_blank">Descargar</a>`:'Error en servidor'; }
+      catch(err){ out.textContent=err; }
+    });
+
+    /* ---------- RESIDENCIAS (Solicitud) ---------- */
+    j('formResidencias').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const url = localStorage.getItem(WKEY_F);
+      const out = j('outResidencias');
+      if(!url){ out.textContent='Configura webhook formatos'; return; }
+      const payload = {
+        tipo: j('tipoR').value,
+        proyecto: j('proyectoR').value,
+        tipoProyecto: j('tipoProyectoR').value,
+        opcionProyecto: j('opcionProyectoR').value,
+        areaOrganizacional: j('areaOrgR').value,
+        periodo: j('periodoR').value,
+        orgNombre: j('orgNombreR').value,
+        orgSector: j('orgSectorR').value,
+        orgDom: j('orgDomR').value,
+        orgCiudad: j('orgCiudadR').value,
+        orgTel: j('orgTelR').value,
+        asesorExtNombre: j('asesorExtNombreR').value,
+        asesorExtPuesto: j('asesorExtPuestoR').value,
+        asesorExtTel: j('asesorExtTelR').value,
+        asesorExtCorreo: j('asesorExtCorreoR').value,
+        firmaNombre: j('firmaNombreR').value,
+        firmaPuesto: j('firmaPuestoR').value,
+        resNombre: j('resNombreR').value,
+        resCarrera: j('resCarreraR').value,
+        numero_control: j('resControlR').value,
+        resCorreo: j('resCorreoR').value,
+        resCel: j('resCelR').value,
+        resSeguro: j('resSeguroR').value,
+        resNss: j('resNssR').value,
+        checklist_palomeo: false
+      };
+      out.textContent='Generando…';
+      try{ const d=await postJSON(url,payload); out.innerHTML=d?.ok?`✅ <a href="${d.fileUrl}" target="_blank">Descargar</a>`:'Error'; }
+      catch(err){ out.textContent=err; }
+    });
+
+    /* ---------- RESIDENCIAS (Descarga de formatos) ---------- */
+    const resFmtOut = j('outResFormatos');
+    async function descargarFormato(tipo){
+      const url = localStorage.getItem(WKEY_F);
+      if(!url){ resFmtOut.textContent='Configura webhook formatos'; return; }
+      resFmtOut.textContent='Preparando…';
+      try{
+        const d = await postJSON(url, { tipo });
+        resFmtOut.innerHTML = d?.ok ? `✅ <a href="${d.fileUrl}" target="_blank">Descargar</a>` : 'Error';
+      }catch(err){ resFmtOut.textContent = err; }
+    }
+    j('btnXXIX')?.addEventListener('click', e=>{ e.preventDefault(); descargarFormato('residencias_anexo_xxix'); });
+    j('btnXXX')?.addEventListener('click', e=>{ e.preventDefault(); descargarFormato('residencias_anexo_xxx'); });
+    j('btnEstructura')?.addEventListener('click', e=>{ e.preventDefault(); descargarFormato('residencias_estructura_reporte'); });
+
+    /* ---------- TITULACIÓN (Solicitud) ---------- */
+    j('formTitulacion').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const url = localStorage.getItem(WKEY_F);
+      const out = j('outTitulacion');
+      if(!url){ out.textContent='Configura webhook formatos'; return; }
+      const payload = {
+        tipo: j('tipoT').value,
+        plan: j('planT').value,
+        opcion: j('opcionT').value,
+        ap_paterno: j('apPatT').value,
+        ap_materno: j('apMatT').value,
+        nombres: j('nombresT').value,
+        carrera: j('carreraT').value,
+        tramite: j('tramiteT').value,
+        numero_control: j('numControlT').value,
+        domicilio: j('domT').value,
+        correo: j('correoTT').value,
+        tel_casa: j('telCasaT').value,
+        tel_cel: j('telCelT').value,
+        nombre_proyecto: (document.getElementById('proyectoBoxT').classList.contains('hidden') ? '' : (j('proyectoT').value||''))
+      };
+      out.textContent='Generando…';
+      try{ const d=await postJSON(url,payload); out.innerHTML=d?.ok?`✅ <a href="${d.fileUrl}" target="_blank">Descargar</a>`:'Error'; }
+      catch(err){ out.textContent=err; }
+    });
+
+    /* Catálogos de opciones por plan */
+    const OPCIONES_2004 = [
+      {v:'tesis', t:'Tesis'},
+      {v:'material_didactico', t:'Elaboración de texto o materiales didácticos'},
+      {v:'proyecto_investigacion', t:'Proyecto de investigación'},
+      {v:'curso_especial', t:'Curso especial de titulación'},
+      {v:'examen_areas_na', t:'Examen por áreas de conocimiento (N/A)'},
+      {v:'memoria_experiencia', t:'Memoria de experiencia profesional'},
+      {v:'escolaridad_na', t:'Escolaridad (Aprovechamiento Académico) (N/A)'},
+      {v:'creditos_posgrado_na', t:'Créditos de posgrado (N/A)'},
+      {v:'memoria_residencia', t:'Memoria de residencia profesional'},
+      {v:'titulacion_integrada', t:'Titulación Integrada'}
+    ];
+    const OPCIONES_2010 = [
+      {v:'tesis_tesina', t:'Tesis o Tesina'},
+      {v:'innovacion_tecnologica', t:'Proyecto de Innovación Tecnológica'},
+      {v:'inv_o_desarrollo_tec', t:'Proyecto de Investigación o Desarrollo Tecnológico'},
+      {v:'emprendedurismo', t:'Proyecto de Emprendedurismo'},
+      {v:'examen_areas_egel_na', t:'Examen por áreas (Testimonio Satisfactorio/Sobresaliente EGEL, N/A)'},
+      {v:'estancia', t:'Estancia'},
+      {v:'proyecto_integrador', t:'Proyecto Integrador'},
+      {v:'proyecto_productivo', t:'Proyecto Productivo'},
+      {v:'memoria_residencia', t:'Memoria de residencia profesional'},
+      {v:'dual', t:'Proyecto Integral de Educación Dual'}
+    ];
+    const HINTS_OPCION = {
+      examen_areas_na: 'Marcado como N/A en el formato; verificar políticas vigentes.',
+      escolaridad_na: 'Marcado como N/A; sujeto a lineamientos del campus.',
+      creditos_posgrado_na: 'Marcado como N/A; revisar disposiciones actuales.',
+      examen_areas_egel_na: 'Marcado como N/A en el formato (EGEL).',
+      memoria_residencia: 'Se basa en el informe de residencias y su liberación.'
+    };
+    const selPlan = j('planT');
+    const selOpcion = j('opcionT');
+    const hintOpcion = j('opcionHintT');
+    function renderOpciones(){
+      const list = selPlan.value === 'plan2010' ? OPCIONES_2010 : OPCIONES_2004;
+      selOpcion.innerHTML = '';
+      for(const opt of list){
+        const o = document.createElement('option');
+        o.value = opt.v; o.textContent = opt.t; selOpcion.appendChild(o);
+      }
+      updateOpcionHint();
+    }
+    function updateOpcionHint(){
+      const v = selOpcion.value;
+      hintOpcion.textContent = HINTS_OPCION[v] || '';
+      const esEGEL = (v === 'examen_areas_na' || v === 'examen_areas_egel_na');
+      const box = j('proyectoBoxT');
+      if(box){ box.classList.toggle('hidden', esEGEL); }
+    }
+    selPlan?.addEventListener('change', renderOpciones);
+    selOpcion?.addEventListener('change', updateOpcionHint);
+    renderOpciones();
+
+    /* ---------- SEGUIMIENTO (consulta a hoja) ---------- */
+    j('formEstadoTit').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const url = localStorage.getItem(WKEY_S);
+      const out = j('outEstadoTit');
+      if(!url){ out.textContent='Configura webhook de Estado (#admin)'; return; }
+      const payload = {
+        numero_control: j('estadoNumCtrl').value.trim(),
+        verificador_tipo: j('estadoTipo').value,
+        verificador_valor: j('estadoValor').value.trim()
+      };
+      out.textContent='Consultando…';
+      try{
+        const d = await postJSON(url,payload);
+        if(d?.ok){
+          out.innerHTML = `Etapa: <strong>${d.etapa||'-'}</strong>${d.oficio?` — Oficio: <strong>${d.oficio}</strong>`:''}<br><span class="muted">Última actualización: ${d.ultima_actualizacion||'-'}</span>`;
+        }else{
+          out.innerHTML = '<span class="warn">Sin resultados o verificador incorrecto.</span>';
+        }
+      }catch(err){ out.innerHTML = '<span class="err">Error: '+(err.message||err)+'</span>'; }
+    });
+
+    /* ---------- ANEXO I ---------- */
+    j('formAnexo1').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const url = localStorage.getItem(WKEY_F);
+      const out = j('outAnexo1');
+      if(!url){ out.textContent='Configura webhook formatos'; return; }
+      const payload = {
+        tipo: j('tipoA1').value,
+        proyecto: j('a1Proyecto').value,
+        asesor: j('a1Asesor').value,
+        num_estudiantes: j('a1NumEst').value,
+        participantes: j('a1Participantes').value,
+        observaciones: j('a1Obs').value
+      };
+      out.textContent='Generando…';
+      try{ const d=await postJSON(url,payload); out.innerHTML=d?.ok?`✅ <a href="${d.fileUrl}" target="_blank">Descargar</a>`:'Error'; }
+      catch(err){ out.textContent=err; }
+    });
+
+    /* ---------- ASESORÍAS ---------- */
+    j('formAsesorias').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const url = localStorage.getItem(WKEY_F);
+      const out = j('outAsesorias');
+      if(!url){ out.textContent='Configura webhook formatos'; return; }
+      const payload = {
+        tipo: j('tipoAs').value,
+        proyecto: j('asProyecto').value,
+        asesor_interno: j('asAsesor').value,
+        alumno: j('asAlumno').value,
+        numero_control: j('asControl').value,
+        sesion_num: j('asNum').value,
+        sesion_fecha: j('asFecha').value,
+        acuerdos: j('asAcuerdos').value,
+        observaciones: j('asObserv').value
+      };
+      out.textContent='Generando…';
+      try{ const d=await postJSON(url,payload); out.innerHTML=d?.ok?`✅ <a href="${d.fileUrl}" target="_blank">Descargar</a>`:'Error'; }
+      catch(err){ out.textContent=err; }
+    });
+
+    /* ---------- CHAT (Q&A) ---------- */
+    const chatBox=j('chatBox');
+    j('chatForm').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const url = localStorage.getItem(WKEY_Q);
+      if(!url){ alert('Configura webhook Q&A primero (#admin)'); return; }
+      const txt=j('chatInput').value.trim(); if(!txt) return;
+      const userMsg=document.createElement('div'); userMsg.className='msg user'; userMsg.textContent=txt; chatBox.appendChild(userMsg);
+      j('chatInput').value=''; chatBox.scrollTop=chatBox.scrollHeight;
+      try{
+        const d=await postJSON(url,{q:txt});
+        const botMsg=document.createElement('div'); botMsg.className='msg bot'; botMsg.textContent=d?.answer||'(sin respuesta)'; chatBox.appendChild(botMsg);
+        chatBox.scrollTop=chatBox.scrollHeight;
+      }catch(err){
+        const botMsg=document.createElement('div'); botMsg.className='msg bot'; botMsg.textContent='Error: '+err; chatBox.appendChild(botMsg);
+      }
+    });
+  </script>
+</body>
+</html>
